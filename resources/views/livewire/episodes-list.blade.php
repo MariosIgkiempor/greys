@@ -25,7 +25,7 @@ class extends Component {
         return [
             'shows' => Show::all(),
             'selectedShow' => $this->selectedShowId ? Show::where('id', $this->selectedShowId)->first() : null,
-            'episodes' => Episode::orderBy('air_date', 'desc')
+            'episodes' => Episode::orderBy('order')
                 ->when($this->selectedShowId, fn(Builder $query, int $selectedShowId) => $query->where('show_id', $selectedShowId))
                 ->with(['show', 'views'])
                 ->get(),

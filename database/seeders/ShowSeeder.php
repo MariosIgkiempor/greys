@@ -13,12 +13,12 @@ class ShowSeeder extends Seeder
     public function run(): void
     {
         Show::factory(6)->sequence(
-            ['code' => 'GA', 'title' => 'Grey\'s Anatomy', 'color' => 'slate-500'],
-            ['code' => 'GA:BT', 'title' => 'Grey\'s Anatomy: B-Team', 'color' => 'slate-50'],
-            ['code' => 'PP', 'title' => 'Private Practice', 'color' => 'orange-500'],
-            ['code' => 'S19', 'title' => 'Station 19', 'color' => 'purple-300'],
-            ['code' => 'SG:OC', 'title' => 'Seattle Grace: On Call', 'color' => 'neutral-50'],
-            ['code' => 'SG:MOH', 'title' => 'Seattle Grace: Message of Hope', 'color' => 'neutral-50'],
+            ['code' => 'GA', 'title' => 'Grey\'s Anatomy', 'color' => 'bg-slate-500'],
+            ['code' => 'GA:BT', 'title' => 'Grey\'s Anatomy: B-Team', 'color' => 'bg-neutral-700'],
+            ['code' => 'PP', 'title' => 'Private Practice', 'color' => 'bg-orange-500'],
+            ['code' => 'S19', 'title' => 'Station 19', 'color' => 'bg-purple-300'],
+            ['code' => 'SG:OC', 'title' => 'Seattle Grace: On Call', 'color' => 'bg-neutral-700'],
+            ['code' => 'SG:MOH', 'title' => 'Seattle Grace: Message of Hope', 'color' => 'bg-neutral-700'],
         )->create();
     }
 }

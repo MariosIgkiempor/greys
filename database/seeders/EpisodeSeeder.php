@@ -19,64 +19,52 @@ class EpisodeSeeder extends Seeder
         $file_contents = File::get(storage_path('episodes.txt'));
         $lines = collect(explode("\n", $file_contents));
 
+        $order = 0;
+
         for ($i = 0; $i < $lines->count(); $i += 3) {
             if ($lines->get($i) === '') {
                 continue;
             }
 
-            [$showCode, $episodeTitle] = explode(' ', $lines->get($i), 2);
-            [$seasonAndEpisodeCode, $episodeTitle] = explode(' ', $episodeTitle, 2);
+            [$showCode, $afterShowCode] = explode(' ', $lines->get($i), 2);
+            $showCode = trim($showCode);
+            $afterShowCode = trim($afterShowCode);
+            [$seasonAndEpisodeCode, $episodeTitle] = explode(' ', $afterShowCode, 2);
+            $seasonAndEpisodeCode = trim($seasonAndEpisodeCode);
+            $episodeTitle = trim($episodeTitle);
             try {
                 [$seasonNumber, $episodeNumber] = explode('x', $seasonAndEpisodeCode, 2);
             } catch (Throwable $e) {
             }
 
-            $episodeTitle = Str::after($episodeTitle, ' ');
-            if (preg_match_all('/[\s\w]*:/', $lines->get($i), $matches)) {
-                $showPrefix = trim(chop($matches[0][0], ':'));
-                $showSuffix = trim(chop($matches[0][1], ':'));
+            $episodeTitle = Str::trim($episodeTitle);
 
-                if ($showPrefix === 'GA') {
-                    $showCode = 'GA:BT';
-                    $episodeTitle = trim(Str::afterLast($lines->get($i), ':'));
-                } else {
-
-                    try {
-                        $showPart = Str::after(trim(chop($matches[0][2], ':')), 'Part ');
-                    } catch (Throwable $e) {
-                        dd($matches);
-                    }
-                    $episodeTitle = Str::afterLast($lines->get($i), ':');
-
-                    $showCode = match ($showPrefix . ': ' . $showSuffix) {
-                        'Seattle Grace: On Call' => 'SG:OC',
-                        'Seattle Grace: Message of Hope' => 'SG:MOH',
-                        default => dd("Unknown show code: $showPrefix: $showSuffix"),
-                    };
-
-                    $seasonNumber = 1;
-                    $episodeTitle = $showPart;
-
-                    $episodeTitle = $showPart . ': ' . $episodeTitle;
-                }
-            }
-
-            $show = Show::firstOrCreate(['code' => $showCode], ['title' => match ($showCode) {
-                'GA' => 'Grey\'s Anatomy',
-                'PP' => 'Private Practice',
-                'S19' => 'Station 19',
-                'SG:OC' => 'Seattle Grace: On Call',
-                'SG:MOH' => 'Seattle Grace: Message of Hope',
-                'GA:BT' => 'Grey\'s Anatomy: B-Team',
-                default => dd("Unknown show code: $showCode"),
-            }]);
+            $show = Show::firstOrCreate(['code' => $showCode], [
+                'title' => match ($showCode) {
+                    'GA' => 'Grey\'s Anatomy',
+                    'PP' => 'Private Practice',
+                    'S19' => 'Station 19',
+                    'SG:OC' => 'Seattle Grace: On Call',
+                    'SG:MOH' => 'Seattle Grace: Message of Hope',
+                    'GA:BT' => 'Grey\'s Anatomy: B-Team',
+                    default => dd("Unknown show code: $showCode"),
+                },
+                'color' => match ($showCode) {
+                    'GA' => 'bg-slate-500',
+                    'PP' => 'bg-slate-400',
+                    'S19' => 'bg-purple-300',
+                    'SG:OC' => 'bg-gray-400',
+                    'SG:MOH' => 'bg-gray-400',
+                    'GA:BT' => 'bg-gray-400',
+                    default => dd("Unknown show code: $showCode"),
+                }]);
 
             $episodeWikiUrl = $lines->get($i + 1);
 
             $airDate = Carbon::createFromFormat('F-d-Y', $lines->get($i + 2));
 
             if ($show->episodes()->where(['title' => $episodeTitle, 'air_date' => $airDate])->exists()) {
-                dd("Duplicate episode found in file");
+                dd("Duplicate episode found in file: $episodeTitle");
             }
 
             $show->episodes()->create([
@@ -85,6 +73,7 @@ class EpisodeSeeder extends Seeder
                 'episode_number' => $episodeNumber,
                 'air_date' => $airDate,
                 'wiki_url' => $episodeWikiUrl,
+                'order' => $order++,
             ]);
         }
     }
