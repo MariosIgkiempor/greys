@@ -3,11 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Volt::route('/', 'episodes-list');
-
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Volt::route('/', 'episodes-list')->name('episodes.index');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
