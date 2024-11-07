@@ -13,6 +13,8 @@ new
 class extends Component {
     #[\Livewire\Attributes\Url]
     public ?int $selectedShowId = null;
+    #[\Livewire\Attributes\Url]
+    public ?int $selectedSeason = null;
 
     public function with()
     {
@@ -30,6 +32,9 @@ class extends Component {
                 ->with(['show', 'views'])
                 ->get(),
             'viewsForSelectedShow' => $viewsForSelectedShow,
+            'seasons' => $this->selectedShowId
+                ? Episode::where('show_id', $this->selectedShowId)->max('season')
+                : null
         ];
     }
 
@@ -37,10 +42,21 @@ class extends Component {
     {
         if ($this->selectedShowId === $show->id) {
             $this->selectedShowId = null;
+        } else {
+            $this->selectedShowId = $show->id;
+        }
+
+        $this->selectedSeason = null;
+    }
+
+    public function selectSeason(int $season)
+    {
+        if ($this->selectedSeason === $season) {
+            $this->selectedSeason = null;
             return;
         }
 
-        $this->selectedShowId = $show->id;
+        $this->selectedSeason = $season;
     }
 
     public function watchEpisode(Episode $episode)
@@ -62,7 +78,7 @@ class extends Component {
     </x-slot:header>
 
     <div class="mb-4">
-        <ul class="flex flex-wrap gap-4">
+        <ul class="flex flex-wrap gap-2">
             @foreach($shows as $show)
                 <li>
                     <x-primary-button wire:click="selectShow({{ $show }})"
@@ -70,6 +86,19 @@ class extends Component {
                 </li>
             @endforeach
         </ul>
+
+        @if ($this->selectedShowId)
+            <ul class="mt-4 flex flex-wrap gap-2">
+                @for($i = 1; $i <= $seasons; $i++)
+                    <li>
+                        <x-primary-button wire:click="selectSeason({{ $i }})"
+                                          class="{{ $this->selectedSeason == $i ? '!bg-indigo-400' : null }}">
+                            Season {{ $i }}
+                        </x-primary-button>
+                    </li>
+                @endfor
+            </ul>
+        @endif
     </div>
 
     <x-heading-2>
@@ -83,9 +112,12 @@ class extends Component {
 
     @auth
         <div>
-            <x-progress-bar :percentage="$viewsForSelectedShow->count() / $episodes->count() * 100"
+            <x-progress-bar :percentage="round($viewsForSelectedShow->count() / $episodes->count(), 2) * 100"
                             show_percentage_label="true"
-                            color="sky"/>
+                            show_percentage_label_inline="false"
+                            color="sky"
+                            striped="true"
+                            animated="true"/>
         </div>
     @endauth
 

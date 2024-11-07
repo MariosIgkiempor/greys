@@ -60,14 +60,14 @@
         Str::contains($percentage_label_position, 'top'))
         <div class="text-xs tracking-wider {{str_replace('top-','text-', $percentage_label_position)}}">
             {{$percentage_prefix}} <span
-                class="opacity-{{$percentage_label_opacity}}">{{ $percentage}}%</span> {{$percentage_suffix}}
+                class="text-slate-500 opacity-{{$percentage_label_opacity}}">{{ $percentage}}%</span> {{$percentage_suffix}}
         </div>
     @endif
-    <div class="@if(!$transparent) bg-slate-200/70 dark:bg-dark-800/70 w-full @endif mt-1 my-2 rounded-full">
+    <div class="@if(!$transparent) bg-slate-200/70 dark:bg-slate-800/70 w-full @endif mt-1 my-2 rounded-full">
         <div style="width: {{$percentage}}%"
              class="text-center py-1 {{$bar_color}} {{$css_override}} relative overflow-hidden h-full rounded-full bar-width animate__animated animate__fadeIn {{$bar_class}}">
             @if($show_percentage_label && $show_percentage_label_inline)
-                <span class="text-{{$color}}-{{$text_color_weight[$shade]}} dark:text-dark-600 px-2 text-xs">
+                <span class="text-{{$color}}-{{$text_color_weight[$shade]}} dark:text-slate-600 px-2 text-xs">
             {{$percentage_prefix}} <span class="opacity-{{$percentage_label_opacity}}">{{ $percentage}}%</span> {{$percentage_suffix}}
             </span>
             @endif
@@ -81,7 +81,7 @@
         Str::contains($percentage_label_position, 'bottom'))
         <div class="text-xs tracking-wider {{str_replace('bottom-','text-', $percentage_label_position)}}">
             {{$percentage_prefix}} <span
-                class="opacity-{{$percentage_label_opacity}}">{{ $percentage}}%</span> {{$percentage_suffix}}
+                class="text-slate-500 opacity-{{$percentage_label_opacity}}">{{ $percentage}}%</span> {{$percentage_suffix}}
         </div>
     @endif
 </div>
