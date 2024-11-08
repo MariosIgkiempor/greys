@@ -1,4 +1,8 @@
-@php use Illuminate\Support\Str; @endphp
+<?php
+
+use Illuminate\Support\Str;
+
+?>
 @props([
     'transparent' => false,
     'percentage' => 0,

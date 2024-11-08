@@ -15,13 +15,13 @@ class extends Component {
     public ?int $selectedShowId = null;
     #[\Livewire\Attributes\Url]
     public ?int $selectedSeason = null;
+    #[\Livewire\Attributes\Url]
+    public ?int $selectedEpisode = null;
 
     public function with()
     {
-        $viewsForSelectedShowQuery = View::with('episode');
-        if ($this->selectedShowId) {
-            $viewsForSelectedShowQuery->whereHas('episode', fn(Builder $query) => $query->where('show_id', $this->selectedShowId));
-        }
+        $viewsForSelectedShowQuery = View::with('episode')
+            ->when($this->selectedShowId, fn(Builder $query) => $query->whereHas('episode', fn(Builder $query) => $query->where('show_id', $this->selectedShowId)));
         $viewsForSelectedShow = $viewsForSelectedShowQuery->get();
 
         return [
@@ -29,6 +29,7 @@ class extends Component {
             'selectedShow' => $this->selectedShowId ? Show::where('id', $this->selectedShowId)->first() : null,
             'episodes' => Episode::orderBy('order')
                 ->when($this->selectedShowId, fn(Builder $query, int $selectedShowId) => $query->where('show_id', $selectedShowId))
+                ->when($this->selectedSeason, fn(Builder $query, int $selectedSeason) => $query->where('season', $selectedSeason))
                 ->with(['show', 'views'])
                 ->get(),
             'viewsForSelectedShow' => $viewsForSelectedShow,
@@ -42,6 +43,7 @@ class extends Component {
     {
         if ($this->selectedShowId === $show->id) {
             $this->selectedShowId = null;
+            $this->dispatch('view-changed', ['selectedEpisodeId' => $this->selectedEpisode]);
         } else {
             $this->selectedShowId = $show->id;
         }
@@ -53,10 +55,21 @@ class extends Component {
     {
         if ($this->selectedSeason === $season) {
             $this->selectedSeason = null;
+            $this->dispatch('view-changed', ['selectedEpisodeId' => $this->selectedEpisode]);
             return;
         }
 
         $this->selectedSeason = $season;
+    }
+
+    public function selectEpisode(int $episode)
+    {
+        if ($this->selectedEpisode === $episode) {
+            $this->selectedEpisode = null;
+            return;
+        }
+
+        $this->selectedEpisode = $episode;
     }
 
     public function watchEpisode(Episode $episode)
@@ -104,6 +117,11 @@ class extends Component {
     <x-heading-2>
         @if ($this->selectedShowId)
             {{ $selectedShow->title }}
+            @if ($this->selectedSeason)
+                Season {{ $this->selectedSeason }}
+            @else
+                (All Seasons)
+            @endif
         @else
             All shows
         @endif
@@ -111,13 +129,11 @@ class extends Component {
     </x-heading-2>
 
     @auth
-        <div>
-            <x-progress-bar :percentage="round($viewsForSelectedShow->count() / $episodes->count(), 2) * 100"
-                            show_percentage_label="true"
-                            show_percentage_label_inline="false"
-                            color="sky"
-                            striped="true"
-                            animated="true"/>
+        <div class="">
+            <div class="text-gray-800 dark:text-gray-200">{{ $viewsForSelectedShow->count() }}
+                / {{ $episodes->count() }} episodes watched
+                ({{ round($viewsForSelectedShow->count() / $episodes->count(), 2) * 100 }}%)
+            </div>
         </div>
     @endauth
 
@@ -125,7 +141,12 @@ class extends Component {
         class="divide-y divide-gray-200 rounded-lg border border-gray-200 bg-white dark:divide-gray-800 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100"
     >
         @foreach($episodes as $episode)
-            <li class="flex items-start justify-between p-4">
+            <li @class([
+            "flex items-start justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer",
+            $this->selectedEpisode === $episode->id ? 'bg-gray-50 dark:bg-gray-800' : null,
+            ])
+                wire:click="selectEpisode({{ $episode->id }})"
+                id="episode-{{  $episode->id }}">
                 <div class="space-y-1">
                     <div class="text-lg font-semibold">{{ $episode->title }}</div>
                     <div class="flex gap-3 flex-wrap items-baseline text-sm">
@@ -164,4 +185,15 @@ class extends Component {
             </li>
         @endforeach
     </ul>
+
+    @script
+    <script>
+        Livewire.on('view-changed', () => {
+            setTimeout(() => {
+                const episode = document.getElementById(`episode-{{ $this->selectedEpisode }}`);
+                episode.scrollIntoView({behavior: 'smooth', block: 'center'})
+            }, 1500)
+        })
+    </script>
+    @endscript
 </div>
