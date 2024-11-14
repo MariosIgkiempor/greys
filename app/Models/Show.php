@@ -18,4 +18,15 @@ class Show extends Model
     {
         return $this->hasMany(Episode::class);
     }
+
+    public function className(): string
+    {
+        return match ($this->code) {
+            'GA' => 'bg-green-500 text-black',
+            'PP' => 'bg-slate-800',
+            'S19' => 'bg-purple-300',
+            'SG:OC', 'GA:BT', 'SG:MOH' => 'bg-gray-400 text-black',
+            default => dd("Unknown show code: {$this->code}"),
+        };
+    }
 }

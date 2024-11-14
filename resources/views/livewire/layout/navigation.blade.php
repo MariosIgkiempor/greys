@@ -73,12 +73,12 @@ new class extends Component {
                 </div>
             @else
                 <div class="hidden sm:flex sm:items-center sm:ms-6 gap-6">
-                    <x-primary-button href="{{ route('register') }}">
+                    <x-mary-button link="{{ route('register') }}">
                         Register
-                    </x-primary-button>
-                    <x-secondary-button href="{{ route('login') }}">
+                    </x-mary-button>
+                    <x-mary-button class="btn-outline" link="{{ route('login') }}">
                         Login
-                    </x-secondary-button>
+                    </x-mary-button>
                 </div>
             @endauth
 
